@@ -5,12 +5,14 @@
 ### Create ENV File
 Create an .env file to add Postgres DB configs and OpenAI API Key. The file should look like this:
 
+```
 OPEN_AI_API=<Insert OpenAI Key>
 DB_HOST="localhost"
 DB_PORT="5432"
 DB_USER="postgres"
 DB_PASSWORD="password"
 DB_DATABASE="code_snippet"
+```
 
 ### Installing Ollama Library and Running Llama2 Locally
 Run the command below to download and install Ollama
