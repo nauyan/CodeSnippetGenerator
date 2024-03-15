@@ -70,14 +70,12 @@ sudo docker run -d -p 5001:5001 code-snippet
 To run the application:
 
 1. Install the required dependencies using:
-
-```bash
-pip install -r requirements.txt
-```
+      ```bash
+      pip install -r requirements.txt
+      ```
 2. Start the application by running:
-
-```bash
-python main.py
-```
+      ```bash
+      python main.py
+      ```
 3. Visit http://localhost:5001/ in your web browser.
 4. The application will start running. Select "GPT" to use the GPT model or "Custom LLM" to use a custom model.
