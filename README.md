@@ -2,7 +2,22 @@
 
 ## Introduction
 
+![Code Snippet Generator](code_generator.png)
+
 This repository contains a code snippet generator that utilizes the OpenAI API and interacts with a PostgreSQL database. Follow the instructions below to set up and run the application locally.
+
+Features that are part of this code generation repository are:
+- Web Interface for Code Generation
+- Feedback Loop for Improvement
+- Custom LLM Integration (Llama2 Locally Deployment using Ollama)
+- Containerization of Flask Web App and PostgreSQL DB
+- Prompt Security
+- Snippet Management
+- Snippet Testing System Using Exec
+
+
+
+
 
 ## Getting Started
 
@@ -53,18 +68,18 @@ To install the Ollama library and run the Llama2 model locally, follow these ste
 
 To run a PostgreSQL container to connect to the database, execute the following commands:
 
-```bash
-sudo docker build -t my-postgres-image -f Dockerfile_postgres .
-sudo docker run -d --name my-postgres-container --restart always -p 5432:5432 -v postgres:/var/lib/postgresql/data my-postgres-image
-```
+      ```bash
+      sudo docker build -t my-postgres-image -f Dockerfile_postgres .
+      sudo docker run -d --name my-postgres-container --restart always -p 5432:5432 -v postgres:/var/lib/postgresql/data my-postgres-image
+      ```
 
 ## Running Code Snippet Container
 To run the code snippet container, use the following commands:
 
-```bash
-sudo docker build -t code-snippet -f Dockerfile_code .
-sudo docker run -d -p 5001:5001 code-snippet
-```
+      ```bash
+      sudo docker build -t code-snippet -f Dockerfile_code .
+      sudo docker run -d -p 5001:5001 code-snippet
+      ```
 
 ## Running the Application
 To run the application:
