@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Code Snippet Generator</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+
+      .chat-container {
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        flex: 1;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+      }
+
+      .chat-messages {
+        padding: 10px;
+        overflow-y: auto;
+        flex: 1;
+      }
+
+      .user-message {
+        background-color: #f2f2f2;
+        border-radius: 10px;
+        padding: 10px;
+        margin-bottom: 10px;
+        max-width: 70%;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+      }
+
+      .user-name {
+        color: #007bff;
+        font-weight: bold;
+      }
+
+      .bot-message {
+        background-color: #d3f7ff;
+        border-radius: 10px;
+        padding: 10px;
+        margin-bottom: 10px;
+        max-width: 70%;
+        word-wrap: break-word;
+        white-space: pre-wrap; /* Preserve spaces and line breaks */
+      }
+
+      .bot-name {
+        color: #009688;
+        font-weight: bold;
+      }
+
+      .input-container {
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+      }
+
+      .input-text {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        resize: vertical;
+      }
+
+      .send-button {
+        width: 80px;
+        height: 40px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      .feedback-bar {
+        display: flex;
+        align-items: center;
+        background-color: #f5f5f5;
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 10px;
+      }
+
+      .feedback-bar span {
+        margin-right: 10px;
+        cursor: pointer;
+      }
+
+      .feedback-bar span:hover {
+        color: #007bff;
+      }
+
+      .snippets-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #007bff;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background-color 0.3s;
+      }
+
+      .snippets-button:hover {
+        background-color: #0056b3;
+      }
+
+      /* Snippets sidebar styles */
+      #snippets-container {
+        position: fixed;
+        top: 0;
+        right: -800px;
+        width: 400px;
+        height: 100%;
+        background-color: #333;
+        color: #fff;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        transition: right 0.3s ease-out;
+        overflow-y: auto;
+      }
+
+      #snippets-container.show {
+        right: 0;
+      }
+
+      .radio-container {
+        margin-top: 10px;
+      }
+
+      .radio-container label {
+        margin-right: 10px;
+      }
+
+      .back-button {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: #007bff;
+        color: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background-color 0.3s;
+        cursor: pointer;
+        display: none;
+        z-index: 100;
+      }
+
+      .back-button:hover {
+        background-color: #0056b3;
+      }
+
+      .close-button {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: #007bff;
+        color: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background-color 0.3s;
+        cursor: pointer;
+        z-index: 9999999999; /* Ensure the close button is on top of the snippets */
+      }
+
+      .close-button:hover {
+        background-color: #0056b3;
+      }
+
+      .snippet {
+        background-color: #444;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+        max-height: 50px; /* Adjust this value as needed */
+      }
+
+      .snippet.expanded {
+        max-height: none;
+      }
+
+      .snippet pre {
+        margin: 0;
+      }
+
+      .snippet-actions {
+        margin-top: 10px;
+      }
+
+      .btn {
+        padding: 5px 10px;
+        margin-right: 10px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .btn.edit {
+        background-color: #4caf50;
+      }
+
+      .btn.delete {
+        background-color: #f44336;
+      }
+
+      .btn:hover {
+        background-color: #555;
+      }
+
+      textarea {
+        width: 100%;
+        height: 100px;
+        margin-bottom: 10px;
+        resize: vertical;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="radio-container">
+        <input type="radio" id="gpt" name="bot-type" value="gpt" checked />
+        <label for="gpt">GPT</label>
+        <input
+          type="radio"
+          id="custom-llm"
+          name="bot-type"
+          value="custom-llm"
+        />
+        <label for="custom-llm">Custom LLM</label>
+      </div>
+      <div class="chat-container">
+        <div class="chat-messages"></div>
+        <div class="input-container">
+          <textarea
+            class="input-text"
+            id="user-input"
+            placeholder="Type your message..."
+            onkeydown="handleKeyDown(event)"
+          ></textarea>
+
+          <button class="send-button" onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+      <a href="#" class="snippets-button" onclick="toggleSnippets()"
+        >View Snippets</a
+      >
+    </div>
+    <button class="back-button" onclick="toggleSnippets()">Back</button>
+    <div id="snippets-container">
+      <button class="back-button" onclick="toggleSnippets()">Back</button>
+    </div>
+
+    <script>
+      // Functions from snippets.html
+      function createSnippetElement(snippetData) {
+        var snippetDiv = document.createElement("div");
+        snippetDiv.classList.add("snippet");
+
+        var preElement = document.createElement("pre");
+        preElement.textContent = snippetData.snippets;
+
+        var actionsDiv = document.createElement("div");
+        actionsDiv.classList.add("snippet-actions");
+
+        var editButton = document.createElement("button");
+        editButton.textContent = "Edit";
+        editButton.classList.add("btn", "edit");
+        editButton.dataset.responseId = snippetData.response_id;
+
+        var deleteButton = document.createElement("button");
+        deleteButton.textContent = "Delete";
+        deleteButton.classList.add("btn", "delete");
+        deleteButton.dataset.responseId = snippetData.response_id;
+
+        var testButton = document.createElement("button");
+        testButton.textContent = "Test";
+        testButton.classList.add("btn", "test");
+        testButton.dataset.snippet = snippetData.snippets;
+
+        actionsDiv.appendChild(editButton);
+        actionsDiv.appendChild(deleteButton);
+        actionsDiv.appendChild(testButton);
+
+        snippetDiv.appendChild(preElement);
+        snippetDiv.appendChild(actionsDiv);
+
+        snippetDiv.addEventListener("click", function () {
+          snippetDiv.classList.toggle("expanded");
+        });
+
+        editButton.addEventListener("click", function (event) {
+          event.stopPropagation(); // Prevent event from bubbling up to snippetDiv
+          makeSnippetEditable(snippetDiv, snippetData);
+        });
+
+        deleteButton.addEventListener("click", function (event) {
+          event.stopPropagation(); // Prevent event from bubbling up to snippetDiv
+          deleteSnippet(snippetData.response_id);
+        });
+
+        testButton.addEventListener("click", function (event) {
+          event.stopPropagation(); // Prevent event from bubbling up to snippetDiv
+          testCode(testButton.dataset.snippet, testButton);
+        });
+
+        return snippetDiv;
+      }
+
+      function makeSnippetEditable(snippetDiv, snippetData) {
+        var preElement = snippetDiv.querySelector("pre");
+        var snippetContent = preElement.textContent;
+
+        var textarea = document.createElement("textarea");
+        textarea.value = snippetContent;
+
+        var applyButton = document.createElement("button");
+        applyButton.textContent = "Apply";
+        applyButton.classList.add("btn", "apply");
+
+        var cancelButton = document.createElement("button");
+        cancelButton.textContent = "Cancel";
+        cancelButton.classList.add("btn", "cancel");
+
+        snippetDiv.innerHTML = ""; // Clear existing content
+        snippetDiv.appendChild(textarea);
+        snippetDiv.appendChild(applyButton);
+        snippetDiv.appendChild(cancelButton);
+
+        applyButton.addEventListener("click", function () {
+          var newSnippetContent = textarea.value;
+          editSnippet(snippetData.response_id, newSnippetContent);
+        });
+
+        cancelButton.addEventListener("click", function () {
+          snippetDiv.innerHTML = ""; // Clear editable content
+          snippetDiv.appendChild(preElement); // Restore original snippet content
+          snippetDiv.appendChild(actionsDiv); // Restore actions
+        });
+      }
+
+      function renderSnippets(snippetsData) {
+        var snippetsContainer = document.getElementById("snippets-container");
+        snippetsContainer.innerHTML = "";
+        snippetsData.forEach(function (snippetData) {
+          var snippetElement = createSnippetElement(snippetData);
+          snippetsContainer.appendChild(snippetElement);
+        });
+      }
+
+      function closeSnippets() {
+        var snippetsContainer = document.getElementById("snippets-container");
+        snippetsContainer.classList.remove("show");
+      }
+
+      function fetchSnippets() {
+        fetch("/get_snippets", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ user_id: 1 }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            renderSnippets(data);
+          })
+          .catch((error) => {
+            console.error("Error fetching snippets:", error);
+          });
+      }
+
+      function editSnippet(responseId, newSnippetContent) {
+        fetch("/edit_snippet", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            response_id: responseId,
+            snippet_content: newSnippetContent,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            window.location.reload(); // Re-render snippets after editing
+          })
+          .catch((error) => {
+            console.error("Error editing snippet:", error);
+          });
+      }
+
+      function deleteSnippet(responseId) {
+        fetch("/delete_snippet", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ response_id: responseId }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            window.location.reload(); // Re-render snippets after deletion
+          })
+          .catch((error) => {
+            console.error("Error deleting snippet:", error);
+          });
+      }
+
+      function testCode(code, testButton) {
+        fetch("/test_code", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ code: code }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              testButton.textContent = "Code Working";
+              testButton.classList.remove("test");
+              testButton.classList.add("success");
+            } else {
+              testButton.textContent = "Code Not Working";
+              testButton.classList.remove("test");
+              testButton.classList.add("failure");
+            }
+          })
+          .catch((error) => {
+            console.error("Error testing code:", error);
+          });
+      }
+
+      // Function to toggle snippets container
+      function toggleSnippets() {
+        var snippetsContainer = document.getElementById("snippets-container");
+        var backButton = document.querySelector(".back-button");
+        snippetsContainer.classList.toggle("show");
+        backButton.style.display = snippetsContainer.classList.contains("show")
+          ? "block"
+          : "none";
+        if (snippetsContainer.classList.contains("show")) {
+          fetchSnippets();
+        }
+      }
+    </script>
+
+    <script>
+      function sendMessage(feedbackInput) {
+        if (document.querySelector(".feedback-bar")) {
+          feedback = document.querySelector(".feedback-bar");
+          feedback.remove();
+        }
+        var userInput =
+          feedbackInput || document.getElementById("user-input").value;
+        if (userInput.trim() === "") {
+          return;
+        }
+        var chatMessages = document.querySelector(".chat-messages");
+        if (!feedbackInput) {
+          var userMessage =
+            '<div class="user-message"><span class="user-name">User:</span> ' +
+            userInput +
+            "</div>";
+          chatMessages.insertAdjacentHTML("beforeend", userMessage);
+        }
+        chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to the bottom
+        document.getElementById("user-input").value = ""; // Clear input field after sending message
+        document.getElementById("user-input").focus(); // Focus on input field after sending message
+
+        var botUrl = document.getElementById("gpt").checked
+          ? "/get_response"
+          : "/get_response_custom";
+
+        // Send request to server
+        fetch(botUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ message: userInput }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            var botMessage =
+              '<div class="bot-message"><span class="bot-name">Chatbot:</span> ' +
+              data.message +
+              "</div>";
+            chatMessages.insertAdjacentHTML("beforeend", botMessage);
+            chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to the bottom
+
+            // Add feedback bar
+            var feedbackBar =
+              '<div class="feedback-bar">' +
+              '<span onclick="handleFeedback(true)" title="Good">&#128077;</span>' +
+              '<span onclick="handleFeedback(false)" title="Bad">&#128078;</span>' +
+              "</div>";
+            chatMessages.insertAdjacentHTML("beforeend", feedbackBar);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+
+      function handleFeedback(isGood) {
+        var feedbackBar = document.querySelector(".feedback-bar");
+        feedbackBar.remove(); // Remove the feedback bar
+
+        if (!isGood) {
+          sendMessage(
+            "Please take a moment to review the requirements and provide a more relevant response."
+          );
+        }
+      }
+
+      function handleKeyDown(event) {
+        if (event.keyCode === 13 && event.shiftKey) {
+          // If Shift + Enter is pressed, prevent default action (submitting form)
+          event.preventDefault();
+          // Insert a newline character into the textarea
+          var textarea = document.getElementById("user-input");
+          var cursorPos = textarea.selectionStart;
+          var textBeforeCursor = textarea.value.substring(0, cursorPos);
+          var textAfterCursor = textarea.value.substring(cursorPos);
+          textarea.value = textBeforeCursor + "\n" + textAfterCursor;
+          // Adjust the cursor position
+          textarea.selectionStart = textarea.selectionEnd = cursorPos + 1;
+        } else if (event.keyCode === 13) {
+          // If only Enter is pressed, send the message
+          event.preventDefault(); // Prevent inserting a newline character
+          sendMessage();
+        }
+      }
+    </script>
+  </body>
+</html>

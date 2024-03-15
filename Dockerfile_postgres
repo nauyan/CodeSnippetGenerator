@@ -1,0 +1,13 @@
+# Use the official PostgreSQL image from Docker Hub
+FROM postgres:latest
+
+# Set environment variables for PostgreSQL
+ENV POSTGRES_DB code_snippet
+ENV POSTGRES_USER postgres
+ENV POSTGRES_PASSWORD password
+
+# Copy the SQL initialization script into the container
+COPY init.sql /docker-entrypoint-initdb.d/
+
+# Set the volume path for persistent data storage
+VOLUME /home/usr/Desktop/code-snippet/postgres
